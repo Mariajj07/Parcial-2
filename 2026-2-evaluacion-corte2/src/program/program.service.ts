@@ -107,8 +107,32 @@ export class ProgramService {
 
     // TODO Reto 3: bulkCreate(bulkCreateProgramDto, user) -> crea todos los programas o ninguno
     //   (transacción). Cualquier nombre/código repetido -> 409 y rollback.
-    async bulkCreate(bulkCreateProgramDto: BulkCreateProgramDto, user: User){
+    async bulkCreate(bulkCreateProgramDto: BulkCreateProgramDto, user: User): Promise<Program[]>{
+        const { programs } = bulkCreateProgramDto;
 
+        const queryRunner = this.datasource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try{
+
+            const newPrograms: Program[] = [];
+            for(const program of programs){
+                const newProgram = queryRunner.manager.create(Program, { ...program, createdBy: user });
+                newPrograms.push(newProgram);
+            }
+
+            await queryRunner.manager.save(newPrograms);
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+
+            return newPrograms;
+
+        }catch(error){
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            this.handleException(error);
+        }
     }
 
 

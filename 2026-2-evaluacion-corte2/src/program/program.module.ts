@@ -11,7 +11,9 @@ import { UserModule } from 'src/user/user.module';
   controllers: [ProgramController],
   // TODO Reto 1: registra la entidad Program con TypeORM
   // TODO Reto 4: importa lo necesario para poder usar @Auth() en el controlador
-  imports: [ TypeOrmModule.forFeature([Program, Student])],
-  providers: [ProgramService],
+  imports: [
+    TypeOrmModule.forFeature([Program, Student]),
+    UserModule 
+  ],  providers: [ProgramService],
 })
 export class ProgramModule {}
